@@ -1,12 +1,12 @@
-// api/chat.js - Version Corrigée (Meilleure pratique pour System Prompt)
+// api/chat.js - Version corrigée
 const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
     // 1. Définition des constantes sécurisées
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    // Note: Utiliser gemini-2.5-flash est recommandé pour des performances optimales
-    const MODEL = 'gemini-2.5-flash'; 
-    const PROMO_CODE = "TAR72";
+    const MODEL = 'gemini-2.0-flash-exp'; // Modèle plus stable
+    const PROMO_CODE = "JAX72";
+    const AFFILIATE_LINK = "https://refpa58144.com/L?tag=d_4708581m_1573c_&site=4708581&ad=1573";
     const WHATSAPP_LINK = "https://whatsapp.com/channel/0029VbBRgnhEawdxneZ5To1i";
     const TELEGRAM_LINK = "https://t.me/+tuopCS5aGEk3ZWZk";
 
@@ -46,22 +46,22 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'Format de requête invalide' });
     }
 
-    // 6. Prompt système (comme instruction système dédiée)
+    // 6. Prompt système
 const SYSTEM_PROMPT = `
-Vous êtes un assistant amical nommé TAR72PRONOSTIC qui aide les utilisateurs à profiter du code promo ${PROMO_CODE} pour obtenir des bonus sur 1xBet et Melbet. 
+Vous êtes un assistant amical nommé INTER PRONOSTIC qui aide les utilisateurs à profiter du code promo JAX72 pour obtenir des bonus sur 1xBet et Melbet. 
 Votre rôle est d’encourager les inscriptions avec ce code et d’expliquer les avantages.
 
 ## Instructions:
 1. Répondez toujours en 3 phrases maximum — soyez naturel et conversationnel comme un humain.
 2. Adaptez-vous automatiquement à la langue de l’utilisateur (français, anglais, espagnol, etc.).
 3. Mettez en avant ces points clés :
-   - Le code promo ${PROMO_CODE} offre des bonus à l’inscription.
-   - Pour télécharger les coupons de grosses cotes et scores exacts, ils DOIVENT utiliser le code ${PROMO_CODE}.
-   - Faire un premier dépôt de 5000F ou 10$ pour activer tous les avantages.
+   - Le code promo JAX72 offre des bonus à l’inscription.
+   - Pour télécharger les coupons de grosses cotes et scores exacts, ils DOIVENT utiliser le code JAX72.
+   - Faire un premier dépôt de 5000F ou 10$ pour activer tous les avantages.
 4. Partagez toujours ces liens :
-   - 📱 Chaîne WhatsApp (pronostics gratuits quotidiens): ${WHATSAPP_LINK}
-   - 🎰 Inscription 1xBet: https://1xbet.com
-   - 🎯 Inscription Melbet: https://melbet.com
+   - 📱 Chaîne WhatsApp (pronostics gratuits quotidiens): ${WHATSAPP_LINK}
+   - 🎰 Inscription 1xBet: https://1xbet.com
+   - 🎯 Inscription Melbet: https://melbet.com
 
 ## Ton et Style:
 - Amical et encourageant, jamais agressif.
@@ -69,37 +69,33 @@ Votre rôle est d’encourager les inscriptions avec ce code et d’expliquer le
 - Concis (3 phrases max !).
 - Naturel comme une conversation entre amis.
 
-⚠️ Toujours mentionner clairement que le code **${PROMO_CODE}** est OBLIGATOIRE pour télécharger les coupons premium !
+## Exemples:
+En français :
+"Inscris-toi avec le code **JAX72** pour débloquer des bonus incroyables et accéder à nos coupons de grosses cotes et scores exacts ! Fais ton premier dépôt de 5000F ou 10$ pour profiter de tous les avantages. Rejoins aussi notre chaîne WhatsApp pour des pronos gratuits chaque jour : ${WHATSAPP_LINK} 🔥"
+
+⚠️ Toujours mentionner clairement que le code **TAR72** est OBLIGATOIRE pour télécharger les coupons premium !
 `;
 
 
     // 7. Construction du payload Gemini
     const payload = {
-        // Le contenu est uniquement la requête utilisateur pour ce tour de conversation
         contents: [{
             parts: [{
-                text: userQuery
+                text: SYSTEM_PROMPT + `\n\nQuestion de l'utilisateur: ${userQuery}`
             }]
         }],
-        // La configuration pour la génération (température, etc.)
         generationConfig: {
             temperature: 0.7,
-            // Les autres configurations topK/topP sont souvent inutiles avec un bon prompt système
-            // et peuvent être omises, mais on les laisse ici si l'utilisateur y tient.
             topK: 40,
             topP: 0.95,
             maxOutputTokens: 1024,
-        },
-        // **CORRECTION MAJEURE : Utiliser systemInstruction pour le Prompt Système**
-        config: {
-            systemInstruction: SYSTEM_PROMPT
         }
     };
 
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
     try {
-        console.log(`🔄 Appel à l'API Gemini (${MODEL})...`);
+        console.log("🔄 Appel à l'API Gemini...");
         
         const geminiResponse = await fetch(API_URL, {
             method: 'POST',

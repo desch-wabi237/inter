@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 // --- 1. Mises à jour des Définitions et Constantes ---
 // ===========================================
 const PROMO_CODE = "JAX72"; // Nouveau code promo
-const BOT_NAME = "INTERPRONOSTIC"; // Nouveau nom du chat
+const BOT_NAME = "INTER PRONOSTIC"; // Nouveau nom du chat
 
 // Liens affiliés et sociaux (Conservés)
 const AFFILIATE_LINK = "https://refpa58144.com/L?tag=d_4708581m_1573c_&site=4708581&ad=1573";
@@ -64,7 +64,7 @@ const App = () => {
         { 
             id: 1, 
             // Message initial mis à jour avec le nouveau nom et code promo
-            text: `Salut l'ami ! Je suis **${BOT_NAME}**, ton expert en pronostics. Mon objectif est simple : t'assurer le **BONUS MAXIMAL** sur 1xBet et Melbet avec le code **${PROMO_CODE}**. Que puis-je analyser pour toi aujourd'hui ? (Tu peux m'envoyer un texte, un vocal, ou une image/PDF d'un match !) `, 
+            text: `Salut l'ami ! Je suis **${BOT_NAME}**, ton expert en pronostics. Mon objectif est simple : t'assurer le **BONUS MAXIMAL** sur 1xBet et Melbet avec le code promo **${PROMO_CODE}**. Que puis-je analyser pour toi aujourd'hui ?`, 
             sender: 'bot', 
             isTyping: false 
         }
