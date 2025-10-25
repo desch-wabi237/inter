@@ -1,10 +1,10 @@
-// api/chat.js - Version corrigée
+// api/chat.js – Version Hugging Face Inference API
 const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
     // 1. Définition des constantes sécurisées
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    const MODEL = 'gemini-2.0-flash-exp'; // Modèle plus stable
+    const HF_API_KEY = process.env.HF_API_KEY;
+    const MODEL = 'mistralai/Mistral-7B-Instruct-v0.2'; // Modèle open-source performant
     const PROMO_CODE = "JAX72";
     const AFFILIATE_LINK = "https://refpa58144.com/L?tag=d_4708581m_1573c_&site=4708581&ad=1573";
     const WHATSAPP_LINK = "https://whatsapp.com/channel/0029VbBRgnhEawdxneZ5To1i";
@@ -16,7 +16,6 @@ module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     
-    // Gérer les requêtes OPTIONS pour CORS
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -27,8 +26,8 @@ module.exports = async (req, res) => {
     }
 
     // 4. Vérification de la clé API
-    if (!GEMINI_API_KEY) {
-        console.error("❌ Clé API Gemini manquante dans les variables d'environnement");
+    if (!HF_API_KEY) {
+        console.error("❌ Clé API Hugging Face manquante dans les variables d'environnement");
         return res.status(500).json({ error: "Configuration serveur manquante" });
     }
 
@@ -46,8 +45,8 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'Format de requête invalide' });
     }
 
-    // 6. Prompt système
-const SYSTEM_PROMPT = `
+    // 6. Prompt système (inchangé)
+    const SYSTEM_PROMPT = `
 Vous êtes un assistant amical nommé INTER PRONOSTIC qui aide les utilisateurs à profiter du code promo JAX72 pour obtenir des bonus sur 1xBet et Melbet. 
 Votre rôle est d’encourager les inscriptions avec ce code et d’expliquer les avantages.
 
@@ -60,6 +59,7 @@ Votre rôle est d’encourager les inscriptions avec ce code et d’expliquer le
    - Faire un premier dépôt de 5000F ou 10$ pour activer tous les avantages.
 4. Partagez toujours ces liens :
    - 📱 Chaîne WhatsApp (pronostics gratuits quotidiens): ${WHATSAPP_LINK}
+   - 📱 Canal Telegram (pronostics gratuits quotidiens): ${TELEGRAM_LINK}
    - 🎰 Inscription 1xBet: https://1xbet.com
    - 🎯 Inscription Melbet: https://melbet.com
 
@@ -68,64 +68,55 @@ Votre rôle est d’encourager les inscriptions avec ce code et d’expliquer le
 - Enthousiaste mais crédible.
 - Concis (3 phrases max !).
 - Naturel comme une conversation entre amis.
-
-## Exemples:
-En français :
-"Inscris-toi avec le code **JAX72** pour débloquer des bonus incroyables et accéder à nos coupons de grosses cotes et scores exacts ! Fais ton premier dépôt de 5000F ou 10$ pour profiter de tous les avantages. Rejoins aussi notre chaîne WhatsApp pour des pronos gratuits chaque jour : ${WHATSAPP_LINK} 🔥"
-
-⚠️ Toujours mentionner clairement que le code **TAR72** est OBLIGATOIRE pour télécharger les coupons premium !
 `;
 
-
-    // 7. Construction du payload Gemini
+    // 7. Construction du payload Hugging Face
     const payload = {
-        contents: [{
-            parts: [{
-                text: SYSTEM_PROMPT + `\n\nQuestion de l'utilisateur: ${userQuery}`
-            }]
-        }],
-        generationConfig: {
+        inputs: `${SYSTEM_PROMPT}\n\nQuestion de l'utilisateur: ${userQuery}`,
+        parameters: {
+            max_new_tokens: 300,
             temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
+            repetition_penalty: 1.1,
         }
     };
 
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+    const API_URL = `https://api-inference.huggingface.co/models/${MODEL}`;
 
     try {
-        console.log("🔄 Appel à l'API Gemini...");
-        
-        const geminiResponse = await fetch(API_URL, {
+        console.log("🔄 Appel à l'API Hugging Face...");
+
+        const hfResponse = await fetch(API_URL, {
             method: 'POST',
             headers: { 
+                'Authorization': `Bearer ${HF_API_KEY}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(payload)
         });
 
-        const responseData = await geminiResponse.json();
+        const responseData = await hfResponse.json();
 
-        if (!geminiResponse.ok) {
-            console.error("❌ Erreur Gemini API:", responseData);
-            return res.status(geminiResponse.status).json({ 
-                error: responseData.error?.message || 'Erreur API Gemini' 
+        if (!hfResponse.ok) {
+            console.error("❌ Erreur Hugging Face API:", responseData);
+            return res.status(hfResponse.status).json({ 
+                error: responseData.error || 'Erreur API Hugging Face' 
             });
         }
 
-        const text = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+        // Hugging Face renvoie souvent un tableau [{ generated_text: "..." }]
+        const text = Array.isArray(responseData)
+            ? responseData[0]?.generated_text
+            : responseData?.generated_text;
 
         if (!text) {
-            console.error("❌ Réponse vide de Gemini:", responseData);
+            console.error("❌ Réponse vide de Hugging Face:", responseData);
             return res.status(500).json({ error: "Réponse IA vide" });
         }
 
-        console.log("✅ Réponse Gemini reçue avec succès");
-        
-        // 8. Renvoyer la réponse
+        console.log("✅ Réponse Hugging Face reçue avec succès");
+
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-        return res.status(200).send(text);
+        return res.status(200).send(text.trim());
 
     } catch (error) {
         console.error("💥 Erreur serveur:", error);
