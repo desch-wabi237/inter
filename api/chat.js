@@ -80,7 +80,7 @@ Votre rôle est d’encourager les inscriptions avec ce code et d’expliquer le
         }
     };
 
-    const API_URL = `https://api-inference.huggingface.co/models/${MODEL}`;
+   const MODEL_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct";
 
     try {
         console.log("🔄 Appel à l'API Hugging Face...");
