@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 module.exports = async (req, res) => {
     // 1. Définition des constantes sécurisées
     const HF_API_KEY = process.env.HF_API_KEY;
-    const MODEL = 'mistralai/Mistral-7B-Instruct-v0.2'; // Modèle open-source performant
+    const MODEL_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2";
     const PROMO_CODE = "JAX72";
     const AFFILIATE_LINK = "https://refpa58144.com/L?tag=d_4708581m_1573c_&site=4708581&ad=1573";
     const WHATSAPP_LINK = "https://whatsapp.com/channel/0029VbBRgnhEawdxneZ5To1i";
@@ -45,16 +45,16 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'Format de requête invalide' });
     }
 
-    // 6. Prompt système (inchangé)
+    // 6. Prompt système
     const SYSTEM_PROMPT = `
 Vous êtes un assistant amical nommé INTER PRONOSTIC qui aide les utilisateurs à profiter du code promo JAX72 pour obtenir des bonus sur 1xBet et Melbet. 
-Votre rôle est d’encourager les inscriptions avec ce code et d’expliquer les avantages.
+Votre rôle est d'encourager les inscriptions avec ce code et d'expliquer les avantages.
 
 ## Instructions:
 1. Répondez toujours en 3 phrases maximum — soyez naturel et conversationnel comme un humain.
-2. Adaptez-vous automatiquement à la langue de l’utilisateur (français, anglais, espagnol, etc.).
+2. Adaptez-vous automatiquement à la langue de l'utilisateur (français, anglais, espagnol, etc.).
 3. Mettez en avant ces points clés :
-   - Le code promo JAX72 offre des bonus à l’inscription.
+   - Le code promo JAX72 offre des bonus à l'inscription.
    - Pour télécharger les coupons de grosses cotes et scores exacts, ils DOIVENT utiliser le code JAX72.
    - Faire un premier dépôt de 5000F ou 10$ pour activer tous les avantages.
 4. Partagez toujours ces liens :
@@ -80,12 +80,11 @@ Votre rôle est d’encourager les inscriptions avec ce code et d’expliquer le
         }
     };
 
-   const MODEL_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct";
-
     try {
         console.log("🔄 Appel à l'API Hugging Face...");
 
-        const hfResponse = await fetch(API_URL, {
+        // CORRECTION : Utiliser MODEL_URL au lieu de API_URL
+        const hfResponse = await fetch(MODEL_URL, {
             method: 'POST',
             headers: { 
                 'Authorization': `Bearer ${HF_API_KEY}`,
